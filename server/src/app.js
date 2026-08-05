@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import express from 'express'
-import {getAllItem, postItems} from './controllers/itemController.js'
+import {getAllItem, postItems, selectItem} from './controllers/itemController.js'
 
 dotenv.config();
 
@@ -13,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/items', getAllItem)
 app.post('/items', postItems)
+
+app.post("/select", selectItem);
 
 
 async function start() {

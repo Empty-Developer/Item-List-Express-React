@@ -82,3 +82,46 @@ export const postItems = (req, res) => {
     });
   }
 }
+
+export const selectItem = (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(401).json({
+        message: 'id not found'
+      })
+    }
+
+    const itemId = Number(id);
+
+    const item = items.find((item) => item.id === itemId) || customItems.find((item) => item.id === itemId);
+
+    if (!item) {
+      return res.status(404).json({
+        message: "item not found",
+      });
+    }
+
+    // check selected?
+    if (selectedItems.has(itemId)) {
+      return res.status(409).json({
+        message: "item selected",
+      });
+    }
+
+    selectedItems.add(itemId);
+    selectedOrder.push(itemId);
+
+    return res.status(200).json({
+      message: "item selected",
+    });
+
+  } catch (error) {
+    console.log("error get all items:", error);
+
+    res.status(500).json({
+      message: "not found get items!",
+    });
+  }
+}
