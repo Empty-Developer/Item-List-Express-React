@@ -11,7 +11,7 @@ export const getAllItem = (req, res) => {
     const endItems = Number(req.query.endItems) || 20;
     const search = req.query.search || "";
 
-    let filteredItems = items;
+    let filteredItems = [...items, ...customItems].filter((item) => !selectedItems.has(item.id));
 
     // check search: if filtered
     if (search) {
