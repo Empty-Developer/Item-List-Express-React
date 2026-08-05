@@ -1,0 +1,12 @@
+.input-ui-component {
+  background-color: white;
+  border: none;
+  border-bottom: solid 1px #333;
+  color: black;
+  padding: 16px;
+  font-size: 16px;
+}
+
+.input-ui-component:focus {
+  outline: none;
+}
