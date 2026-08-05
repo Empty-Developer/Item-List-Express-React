@@ -4,4 +4,11 @@
   margin: 20px;
   background-color: #079cdc;
   color:#f0f0f0;
+  font-weight: 400;
+  font-size: medium;
+  cursor: pointer;
+}
+.button-ui-component:hover {
+  background-color: #046e9b;
+  transition: ease 0.5s;
 }

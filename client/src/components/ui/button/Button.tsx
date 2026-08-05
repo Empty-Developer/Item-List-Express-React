@@ -3,7 +3,7 @@ import './Button.css'
 
 interface ButtonProps {
   title: string,
-  onClick: () => void
+  onClick?: () => void
 }
 
 export const Button = ({title, onClick}: ButtonProps) =>{
