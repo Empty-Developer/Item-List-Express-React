@@ -1,0 +1,13 @@
+.item-panel-text {
+  display: flex;
+  border: solid 1px #717070;
+  margin-bottom: 5px;
+  padding: 5px;
+  cursor: pointer;
+  color: #333;
+}
+
+.title-h2-list-item {
+  color: black;
+  text-align: left;
+}
