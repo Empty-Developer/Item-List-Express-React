@@ -1,4 +1,4 @@
-import { items } from "../config/db.js";
+import { items, selectedItems, selectedOrder, customItems } from "../config/db.js";
 
 /**
  * 
@@ -41,8 +41,44 @@ export const getAllItem = (req, res) => {
 
 export const postItems = (req, res) => {
   try {
-    
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(401).json({
+        message: 'id not found'
+      })
+    }
+
+    // check id
+    const checkIdItems = items.some((item) => item.id === Number(id))
+
+    // check id custom
+    const checkCustomIdItems = customItems.some((item) => item.id === Number(id))
+
+    if (checkIdItems || checkCustomIdItems) {
+      return res.status(404).json({
+        message: "item already exists"
+      })
+    }
+
+    // add a new item
+    const newItem = {
+      id: Number(id),
+      title: `Item: ${id}`,
+    }
+
+    customItems.push(newItem);
+
+    return res.status(201).json({
+      message: "item created",
+      item: newItem,
+    });
+
   } catch (error) {
-    
+    console.log("error get all items:", error);
+
+    res.status(500).json({
+      message: "not found get items!",
+    });
   }
 }
