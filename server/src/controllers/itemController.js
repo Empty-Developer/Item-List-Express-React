@@ -1,30 +1,45 @@
-import items from "../config/db.js";
+import { items } from "../config/db.js";
 
-export const getAllItem = async (req, res) => {
+/**
+ * 
+ * @description this controller sorts and sends the 
+ * entire list of items up to 20
+ */
+export const getAllItem = (req, res) => {
   try {
-    const startItems = Number(req.query.startItems) || 0
-    const endItems = Number(req.query.endItems) || 20
+    const startItems = Number(req.query.startItems) || 0;
+    const endItems = Number(req.query.endItems) || 20;
+    const search = req.query.search || "";
 
-    const visibleItems = items.slice(
-      startItems,
-      endItems + startItems
-    )
+    let filteredItems = items;
+
+    // check search: if filtered
+    if (search) {
+      filteredItems = items.filter((item) =>
+        item.id.toString().includes(search)
+      );
+    }
+
+    const visibleItems = filteredItems.slice(
+      startItems, // 0
+      startItems + endItems // 20
+    );
 
     res.status(200).json({
       items: visibleItems,
+      total: filteredItems.length,
     });
 
   } catch (error) {
+    console.log("error get all items:", error);
 
-    console.log("error get all items: ", error);
-
-    return res.status(500).json({
+    res.status(500).json({
       message: "not found get items!",
     });
   }
 };
 
-export const postItems = async (req, res) => {
+export const postItems = (req, res) => {
   try {
     
   } catch (error) {

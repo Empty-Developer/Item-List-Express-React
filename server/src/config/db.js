@@ -1,5 +1,14 @@
 const items = []
 
+/**
+ * @return {selectedItems} set of selected items user`s
+ * @return {selectedOrder} arr for drag drop
+ * @return {customItems} arr for id user`s, if he add in arr
+ */
+const selectedItems = new Set()
+const selectedOrder = []
+const customItems = []
+
 for (let i = 1; i <= 1000000; i++) {
   items.push({
     id: i,
@@ -7,4 +16,9 @@ for (let i = 1; i <= 1000000; i++) {
   })
 }
 
-export default items
+export {
+  items,
+  selectedItems,
+  selectedOrder,
+  customItems,
+};

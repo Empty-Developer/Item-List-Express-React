@@ -11,8 +11,9 @@ const PORT = process.env.PORT || '8080';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/get-items', getAllItem)
-// app.post('post-items' postItems)
+app.get('/items', getAllItem)
+app.post('/items', postItems)
+
 
 async function start() {
   app.listen(PORT, () => {
