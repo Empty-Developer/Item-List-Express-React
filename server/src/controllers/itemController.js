@@ -125,3 +125,113 @@ export const selectItem = (req, res) => {
     });
   }
 }
+
+export const getSelectedItem = (req, res) => {
+  try {
+    const startItems = Number(req.query.startItems) || 0;
+    const endItems = Number(req.query.endItems) || 20;
+    const search = req.query.search || "";
+
+    let selected = selectedOrder
+      .map((id) => {
+        return (
+          items.find((item) => item.id === id) ||
+          customItems.find((item) => item.id === id)
+        );
+      })
+      .filter(Boolean);
+
+    if (search) {
+      selected = selected.filter((item) =>
+        item.id.toString().includes(search)
+      );
+    }
+
+    const visibleItems = selected.slice(
+      startItems,
+      startItems + endItems
+    );
+
+    res.status(200).json({
+      items: visibleItems,
+      total: selected.length,
+    });
+
+  } catch (error) {
+    console.log("error get all items:", error);
+
+    res.status(500).json({
+      message: "not found get items!",
+    });
+  }
+}
+
+export const deleteSelectedItem = (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!selectedItems.has(id)) {
+      return res.status(404).json({
+        message: "item not selected",
+      });
+    }
+
+    selectedItems.delete(id);
+
+    const index = selectedOrder.indexOf(id);
+
+    if (index !== -1) {
+      selectedOrder.splice(index, 1);
+    }
+
+    return res.status(200).json({
+      message: "item delete",
+    });
+
+  } catch (error) {
+    console.log("error get all items:", error);
+
+    res.status(500).json({
+      message: "not found get items!",
+    });
+  }
+}
+
+export const reorderItems = (req, res) => {
+  try {
+    const { order } = req.body;
+
+    // check found arr or not
+    if (!Array.isArray(order)) {
+      return res.status(400).json({
+        message: "not found get arr",
+      });
+    }
+
+    // check about all items selected
+    const isSelected = order.every((id) => selectedItems.has(Number(id)));
+
+    if (!isSelected) {
+      return res.status(400).json({
+        message: "invalid",
+      });
+    }
+
+    // update arr items
+    selectedOrder.length = 0;
+    selectedOrder.push(...order.map(Number));
+
+    return res.status(200).json({
+      message: "updated",
+      order: selectedOrder,
+    });
+
+
+  } catch (error) {
+    console.log("error get all items:", error);
+
+    res.status(500).json({
+      message: "not found get items!",
+    });
+  }
+}
