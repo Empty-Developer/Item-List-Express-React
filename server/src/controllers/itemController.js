@@ -1,8 +1,14 @@
-import { items, selectedItems, selectedOrder, customItems } from "../config/db.js";
+import {
+  customItems,
+  items,
+  selectedItems,
+  selectedOrder,
+} from "../config/db.js";
+import { addToQueue, hasTaskInQueue } from "../middleware/mutationQueueMiddleware.js";
+// import { addItemToQueue } from "../middleware/addItemQueueMiddleware.js";
 
 /**
- * 
- * @description this controller sorts and sends the 
+ * @description this controller sorts and sends the
  * entire list of items up to 20
  */
 export const getAllItem = (req, res) => {
@@ -11,25 +17,26 @@ export const getAllItem = (req, res) => {
     const endItems = Number(req.query.endItems) || 20;
     const search = req.query.search || "";
 
-    let filteredItems = [...items, ...customItems].filter((item) => !selectedItems.has(item.id));
+    let filteredItems = [...items, ...customItems].filter(
+      (item) => !selectedItems.has(item.id),
+    );
 
     // check search: if filtered
     if (search) {
-      filteredItems = items.filter((item) =>
+      filteredItems = filteredItems.filter((item) =>
         item.id.toString().includes(search)
       );
     }
 
     const visibleItems = filteredItems.slice(
       startItems, // 0
-      startItems + endItems // 20
+      startItems + endItems, // 20
     );
 
     res.status(200).json({
       items: visibleItems,
       total: filteredItems.length,
     });
-
   } catch (error) {
     console.log("error get all items:", error);
 
@@ -45,63 +52,71 @@ export const postItems = (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        message: 'id not found'
-      })
-    }
-
-    // check id
-    const checkIdItems = items.some((item) => item.id === Number(id))
-
-    // check id custom
-    const checkCustomIdItems = customItems.some((item) => item.id === Number(id))
-
-    if (checkIdItems || checkCustomIdItems) {
-      return res.status(409).json({
-        message: "item already exists"
-      })
-    }
-
-    // add a new item
-    const newItem = {
-      id: Number(id),
-      title: `Item: ${id}`,
-    }
-
-    customItems.push(newItem);
-
-    return res.status(201).json({
-      message: "item created",
-      item: newItem,
-    });
-
-  } catch (error) {
-    console.log("error get all items:", error);
-
-    res.status(500).json({
-      message: "not found get items!",
-    });
-  }
-}
-
-export const selectItem = (req, res) => {
-  try {
-    const { id } = req.body;
-
-    if (!id) {
-      return res.status(401).json({
-        message: 'id not found'
-      })
+        message: "id not found",
+      });
     }
 
     const itemId = Number(id);
 
     if (!Number.isInteger(itemId)) {
       return res.status(400).json({
-        message:"invalid id"
-      })
+        message: "invalid id",
+      });
     }
 
-    const item = items.find((item) => item.id === itemId) || customItems.find((item) => item.id === itemId);
+    // check id
+    const checkIdItems = items.some((item) => item.id === itemId);
+
+    // check id custom
+    const checkCustomIdItems = customItems.some((item) => item.id === itemId);
+
+    if (checkIdItems || checkCustomIdItems) {
+      return res.status(409).json({
+        message: "item already exists",
+      });
+    }
+
+    // add a new item
+    const newItem = {
+      id: itemId,
+      title: `Item: ${itemId}`,
+    };
+
+    addItemToQueue(newItem);
+
+    return res.status(202).json({
+      message: "item added to queue",
+      item: newItem,
+    });
+  } catch (error) {
+    console.log("error post items:", error);
+
+    res.status(500).json({
+      message: "not found post items!",
+    });
+  }
+};
+
+export const selectItem = (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "id not found",
+      });
+    }
+
+    const itemId = Number(id);
+
+    if (!Number.isInteger(itemId)) {
+      return res.status(400).json({
+        message: "invalid id",
+      });
+    }
+
+    const item = items.find((item) => item.id === itemId) ||
+      customItems.find((item) => item.id === itemId);
 
     if (!item) {
       return res.status(404).json({
@@ -110,27 +125,28 @@ export const selectItem = (req, res) => {
     }
 
     // check selected?
-    if (selectedItems.has(itemId)) {
+    if (selectedItems.has(itemId) || hasTaskInQueue("SELECT", itemId)) {
       return res.status(409).json({
         message: "item selected",
       });
     }
 
-    selectedItems.add(itemId);
-    selectedOrder.push(itemId);
-
-    return res.status(200).json({
-      message: "item selected",
+    addToQueue({
+      type: "SELECT",
+      id: itemId,
     });
 
+    return res.status(202).json({
+      message: "item added to queue",
+    });
   } catch (error) {
-    console.log("error get all items:", error);
+    console.log("error select item:", error);
 
     res.status(500).json({
-      message: "not found get items!",
+      message: "not found select item!",
     });
   }
-}
+};
 
 export const getSelectedItem = (req, res) => {
   try {
@@ -148,29 +164,26 @@ export const getSelectedItem = (req, res) => {
       .filter(Boolean);
 
     if (search) {
-      selected = selected.filter((item) =>
-        item.id.toString().includes(search)
-      );
+      selected = selected.filter((item) => item.id.toString().includes(search));
     }
 
     const visibleItems = selected.slice(
       startItems,
-      startItems + endItems
+      startItems + endItems,
     );
 
     res.status(200).json({
       items: visibleItems,
       total: selected.length,
     });
-
   } catch (error) {
-    console.log("error get all items:", error);
+    console.log("error get selected items:", error);
 
     res.status(500).json({
-      message: "not found get items!",
+      message: "not found selected items!",
     });
   }
-}
+};
 
 export const deleteSelectedItem = (req, res) => {
   try {
@@ -182,26 +195,22 @@ export const deleteSelectedItem = (req, res) => {
       });
     }
 
-    selectedItems.delete(id);
-
-    const index = selectedOrder.indexOf(id);
-
-    if (index !== -1) {
-      selectedOrder.splice(index, 1);
-    }
-
-    return res.status(200).json({
-      message: "item delete",
+    addToQueue({
+      type: "DELETE",
+      id,
     });
 
+    return res.status(202).json({
+      message: "delete added to queue",
+    });
   } catch (error) {
-    console.log("error get all items:", error);
+    console.log("error delete selected item:", error);
 
     res.status(500).json({
-      message: "not found get items!",
+      message: "not found delete item!",
     });
   }
-}
+};
 
 export const reorderItems = (req, res) => {
   try {
@@ -211,6 +220,12 @@ export const reorderItems = (req, res) => {
     if (!Array.isArray(order)) {
       return res.status(400).json({
         message: "not found get arr",
+      });
+    }
+
+    if (order.length !== selectedItems.size) {
+      return res.status(400).json({
+        message: "wrong order length",
       });
     }
 
@@ -224,20 +239,19 @@ export const reorderItems = (req, res) => {
     }
 
     // update arr items
-    selectedOrder.length = 0;
-    selectedOrder.push(...order.map(Number));
-
-    return res.status(200).json({
-      message: "updated",
-      order: selectedOrder,
+    addToQueue({
+      type: "REORDER",
+      order: order.map(Number),
     });
 
-
+    return res.status(202).json({
+      message: "reorder added to queue",
+    });
   } catch (error) {
-    console.log("error get all items:", error);
+    console.log("error reorder items:", error);
 
     res.status(500).json({
-      message: "not found get items!",
+      message: "not found reorder items!",
     });
   }
-}
+};
