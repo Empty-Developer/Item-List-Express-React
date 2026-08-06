@@ -1,4 +1,3 @@
-import React from "react";
 import "./ListItems.css";
 import { closestCenter, DndContext } from "@dnd-kit/core";
 import {
