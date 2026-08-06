@@ -1,20 +1,26 @@
-import { clearQueue, getQueue } from "./mutationQueueMiddleware.js";
 import {
-  customItems,
-  items,
-  selectedItems,
-  selectedOrder,
-} from "../config/db.js";
+  clearMutationQueue,
+  getMutationQueue,
+} from "../queues/mutationQueue.js";
 
-const processQueue = () => {
-  const tasks = getQueue();
+import { selectedItems, selectedOrder } from "../config/db.js";
+
+/**
+ * @description worker executes mutation
+ * queue every second
+ * SELECT add item to selected list
+ * DELETE remove item from selected list
+ * REORDER update drag&drop order
+ */
+const processMutationQueue = () => {
+  const tasks = getMutationQueue();
 
   if (tasks.length === 0) {
     return;
   }
 
   console.log(
-    "Processing queue:",
+    "mutation worker:",
     tasks,
   );
 
@@ -46,13 +52,15 @@ const processQueue = () => {
         selectedOrder.push(
           ...task.order,
         );
+
         break;
     }
   });
-  clearQueue();
+
+  clearMutationQueue();
 };
 
-// every second
+// every 1 second
 setInterval(() => {
-  processQueue();
+  processMutationQueue();
 }, 1000);

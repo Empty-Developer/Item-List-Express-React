@@ -4,8 +4,13 @@ import {
   selectedItems,
   selectedOrder,
 } from "../config/db.js";
-import { addToQueue, hasTaskInQueue } from "../middleware/mutationQueueMiddleware.js";
-// import { addItemToQueue } from "../middleware/addItemQueueMiddleware.js";
+
+import {
+  addToMutationQueue,
+  hasMutationTask,
+} from "../queues/mutationQueue.js";
+
+import { addItemToQueue, hasAddTask } from "../queues/addItemQueue.js";
 
 /**
  * @description this controller sorts and sends the
@@ -65,12 +70,20 @@ export const postItems = (req, res) => {
     }
 
     // check id
-    const checkIdItems = items.some((item) => item.id === itemId);
+    const checkIdItems = items.some(
+      (item) => item.id === itemId,
+    );
 
     // check id custom
-    const checkCustomIdItems = customItems.some((item) => item.id === itemId);
+    const checkCustomIdItems = customItems.some(
+      (item) => item.id === itemId,
+    );
 
-    if (checkIdItems || checkCustomIdItems) {
+    if (
+      checkIdItems ||
+      checkCustomIdItems ||
+      hasAddTask(itemId)
+    ) {
       return res.status(409).json({
         message: "item already exists",
       });
@@ -125,13 +138,16 @@ export const selectItem = (req, res) => {
     }
 
     // check selected?
-    if (selectedItems.has(itemId) || hasTaskInQueue("SELECT", itemId)) {
+    if (
+      selectedItems.has(itemId) ||
+      hasMutationTask("SELECT", itemId)
+    ) {
       return res.status(409).json({
         message: "item selected",
       });
     }
 
-    addToQueue({
+    addToMutationQueue({
       type: "SELECT",
       id: itemId,
     });
@@ -189,13 +205,16 @@ export const deleteSelectedItem = (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    if (!selectedItems.has(id)) {
+    if (
+      !selectedItems.has(id) &&
+      !hasMutationTask("SELECT", id)
+    ) {
       return res.status(404).json({
         message: "item not selected",
       });
     }
 
-    addToQueue({
+    addToMutationQueue({
       type: "DELETE",
       id,
     });
@@ -223,14 +242,10 @@ export const reorderItems = (req, res) => {
       });
     }
 
-    if (order.length !== selectedItems.size) {
-      return res.status(400).json({
-        message: "wrong order length",
-      });
-    }
-
     // check about all items selected
-    const isSelected = order.every((id) => selectedItems.has(Number(id)));
+    const isSelected = order.every(
+      (id) => selectedItems.has(Number(id)),
+    );
 
     if (!isSelected) {
       return res.status(400).json({
@@ -239,8 +254,9 @@ export const reorderItems = (req, res) => {
     }
 
     // update arr items
-    addToQueue({
+    addToMutationQueue({
       type: "REORDER",
+
       order: order.map(Number),
     });
 

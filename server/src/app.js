@@ -9,6 +9,9 @@ import {
   selectItem,
 } from "./controllers/itemController.js";
 
+import "./workers/mutationWorker.js";
+import "./workers/addItemWorker.js";
+
 dotenv.config();
 
 const app = express();

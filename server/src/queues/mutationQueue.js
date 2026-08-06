@@ -1,7 +1,7 @@
 const queue = new Map();
 
 // add task to queue
-export const addToQueue = (task) => {
+export const addToMutationQueue = (task) => {
   let key;
 
   if (task.type === "REORDER") {
@@ -20,19 +20,19 @@ export const addToQueue = (task) => {
   return true;
 };
 
-// check task exists in queue
-export const hasTaskInQueue = (type, id) => {
+// check task exists
+export const hasMutationTask = (type, id) => {
   const key = `${type}-${id}`;
 
   return queue.has(key);
 };
 
-// get all tasks
-export const getQueue = () => {
+// get tasks
+export const getMutationQueue = () => {
   return Array.from(queue.values());
 };
 
 // clear queue
-export const clearQueue = () => {
+export const clearMutationQueue = () => {
   queue.clear();
 };

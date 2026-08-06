@@ -1,6 +1,8 @@
 const items = []
 
 /**
+ * @description storage for application state
+ * @return {items} initial 1000000 elements
  * @return {selectedItems} set of selected items user`s
  * @return {selectedOrder} arr for drag drop
  * @return {customItems} arr for id user`s, if he add in arr
