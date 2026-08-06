@@ -16,15 +16,7 @@ import "./workers/addItemWorker.js";
 dotenv.config();
 
 const app = express();
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://item-list-express-react-al6yc5pof-empty-developer.vercel.app",
-    ],
-    credentials: true,
-  })
-);
+app.use(cors());
 const PORT = process.env.PORT || "8080";
 
 // body
