@@ -17,7 +17,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://item-list-express-react.vercel.app/",
 }));
 const PORT = process.env.PORT || "8080";
 
