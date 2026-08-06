@@ -44,7 +44,7 @@ export const postItems = (req, res) => {
     const { id } = req.body;
 
     if (!id) {
-      return res.status(401).json({
+      return res.status(400).json({
         message: 'id not found'
       })
     }
@@ -56,7 +56,7 @@ export const postItems = (req, res) => {
     const checkCustomIdItems = customItems.some((item) => item.id === Number(id))
 
     if (checkIdItems || checkCustomIdItems) {
-      return res.status(404).json({
+      return res.status(409).json({
         message: "item already exists"
       })
     }
@@ -94,6 +94,12 @@ export const selectItem = (req, res) => {
     }
 
     const itemId = Number(id);
+
+    if (!Number.isInteger(itemId)) {
+      return res.status(400).json({
+        message:"invalid id"
+      })
+    }
 
     const item = items.find((item) => item.id === itemId) || customItems.find((item) => item.id === itemId);
 
