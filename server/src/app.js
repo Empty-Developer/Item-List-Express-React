@@ -8,6 +8,7 @@ import {
   reorderItems,
   selectItem,
 } from "./controllers/itemController.js";
+import cors from "cors";
 
 import "./workers/mutationWorker.js";
 import "./workers/addItemWorker.js";
@@ -15,6 +16,9 @@ import "./workers/addItemWorker.js";
 dotenv.config();
 
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173",
+}));
 const PORT = process.env.PORT || "8080";
 
 // body

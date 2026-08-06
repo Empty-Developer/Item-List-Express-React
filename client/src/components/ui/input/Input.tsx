@@ -1,6 +1,23 @@
-import React from 'react'
-import './Input.css'
+import "./Input.css";
 
-export const Input = () =>{
-  return <input type="number" placeholder='Enter ID' className='input-ui-component'/>;
+interface InputProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
 }
+
+export const Input = ({
+  value,
+  onChange,
+  placeholder,
+}: InputProps) => {
+  return (
+    <input
+      type="text"
+      value={value}
+      placeholder={placeholder}
+      className="input-ui-component"
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+};

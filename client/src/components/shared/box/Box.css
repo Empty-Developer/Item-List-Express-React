@@ -1,6 +1,6 @@
 .box-container {
-  padding: 50px;
-  background-color: #ffffff;
-  border: solid 1px #000000;
-  margin: 20px;
+  width:400px;
+  height:700px;
+  padding:20px;
+  border:1px solid #000000;
 }
